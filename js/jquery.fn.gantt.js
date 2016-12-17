@@ -1,25 +1,129 @@
 // jQuery Gantt Chart
 // ==================
-
-// Basic usage:
-
-//      $(".selector").gantt({
-//          source: "ajax/data.json",
-//          scale: "weeks",
-//          minScale: "weeks",
-//          maxScale: "months",
-//          onItemClick: function(data) {
-//              alert("Item clicked - show some details");
-//          },
-//          onAddClick: function(dt, rowId) {
-//              alert("Empty space clicked - add an item!");
-//          },
-//          onRender: function() {
-//              console.log("chart rendered");
-//          }
-//      });
-
 //
+// Basic usage:
+//*********************************************************************************************************************************
+//
+// Change line:  createProgressBar: function (days, cls, desc, label, dataObj) { //Is modified by errors in its original structure
+// For: createProgressBar: function (days, id, cls, desc, label, dataObj) { //this correct structure
+// 
+// Add info in bar objet
+// 
+//	     var bar = $('<div class="bar"><div class="fn-label">' + label + '</div></div>')
+//          .addClass(cls)
+// 			.attr({
+// 				'id': id,                //new properties
+// 				'data-desc': desc,		 //new properties 
+// 				'data-label': label,     //new properties
+// 			})
+//          .css({
+//             width: ((cellWidth * days) - barMarg) + 2
+//          })
+//          .data("dataObj", dataObj);
+// 
+// Change return in event on click:
+//      bar.click(function (e) {
+//			e.stopPropagation();
+//			settings.onItemClick(this);
+//		});
+// 
+// Add event on double click:
+//      Add in options properties:
+//             onItemDblDlick: function (data) { return; },
+// 
+// Add enven double click:
+//			bar.dblclick(function (e) {
+//				e.stopPropagation();
+// 	            settings.onItemDblDlick(this);
+//			}); 
+//
+//
+//**************************************************  example for the new features **************************************************
+/*
+		$(function() {
+
+			"use strict";
+			$(".gantt").gantt({
+				source: 
+				[
+					{
+						name: "Testing",
+						desc: " ",
+						values: 
+						[{
+							from: "/Date(" + strTodate('2016-12-05', '-').valueOf() + ")/",
+							to: "/Date(" + strTodate('2016-12-10', '-').valueOf() + ")/",
+							label: "Test Roman chart",
+							id: 'r25',
+							customClass: "ganttRed",
+							desc: "Item 0 - 10<br>12.06.2012 15:39:09 - 12.06.2012 15:39:09<br>Test 0",
+							dataObj:
+								{
+									dat1: 1000,
+									dat2: 'Woou!',
+									dat3: 'Hou!',
+								}
+						}]
+					},
+					{
+						name: "Testing",
+						desc: " ",
+						values: 
+						[{
+							from: "/Date(" + strTodate('2016-12-10', '-').valueOf() + ")/",
+							to: "/Date(" + strTodate('2016-12-15', '-').valueOf() + ")/",
+							label: "Test Roman chart",
+							id: 'r26',
+							customClass: "ganttRed",
+							desc: "Item 0 - 10<br>12.06.2012 15:39:09 - 12.06.2012 15:39:09<br>Test 0",
+							dataObj:
+								{
+									dat1: 1001,
+									dat2: 'Ammm!',
+									dat3: 'Not yet!',
+								}
+						}]
+					}
+				],
+				//onItemClick:function(sender) {
+				//	alert('Event onclick result ID = ' + $(sender).attr('id'));
+				//},
+				onItemDblDlick: function(sender) {
+					alert('Event onDoubleClick result ID = ' + $(sender).attr('id'));
+					var iobjets = $(sender).data('dataObj');
+					alert(iobjets.dat1)
+					
+					// show all info
+					//$.each(iobjets, function () {
+					//	alert(this);
+					//});
+				},
+				scale: "weeks",
+				maxScale: "months",
+				minScale: "days",
+				navigate: "scroll",
+				itemsPerPage: 10,
+                draggable: true,
+                useCookie: true,
+                scrollToToday: false,
+			});
+
+			$(".gantt").popover({
+				selector: ".bar",
+				title: "I'm a popover",
+				content: "And I'm the content of said popover.",
+				trigger: "hover"
+			});
+
+		});
+		
+		function strTodate(datestring, delimiteby)
+		{
+			var arrdate = datestring.split(delimiteby);
+			var dt = new Date(parseInt(arrdate[0]), parseInt(arrdate[1]), parseInt(arrdate[2]));
+			return dt;
+		}
+*/
 /*jshint shadow:true, unused:false, laxbreak:true, evil:true*/
 /*globals jQuery, alert*/
 (function ($) {
@@ -44,6 +148,7 @@
             minScale: "hours",
             waitText: "Please wait...",
             onItemClick: function (data) { return; },
+			onItemDblDlick: function (data) { return; },
             onAddClick: function (data) { return; },
             onRender: function() { return; },
             onDataLoadFailed: function(data) { return; },
@@ -940,11 +1045,16 @@
             // **Progress Bar**
             // Return an element representing a progress of position within
             // the entire chart
-            createProgressBar: function (days, cls, desc, label, dataObj) {
+            createProgressBar: function (days, id, cls, desc, label, dataObj) {
                 var cellWidth = tools.getCellSize();
                 var barMarg = tools.getProgressBarMargin() || 0;
                 var bar = $('<div class="bar"><div class="fn-label">' + label + '</div></div>')
                         .addClass(cls)
+						.attr({
+							'id': id,
+							'data-desc': desc, 
+							'data-label': label,
+							})
                         .css({
                             width: ((cellWidth * days) - barMarg) + 2
                         })
@@ -969,7 +1079,14 @@
                 }
                 bar.click(function (e) {
                     e.stopPropagation();
-                    settings.onItemClick($(this).data("dataObj"));
+                    //settings.onItemClick($(this).data("dataObj"));
+					//settings.onItemClick($(this).attr('id'));
+					settings.onItemClick(this);
+                });
+				
+				bar.dblclick(function (e) {
+                    e.stopPropagation();
+					settings.onItemDblDlick(this);
                 });
                 return bar;
             },
@@ -1787,3 +1904,4 @@
 
     };
 })(jQuery);
+
