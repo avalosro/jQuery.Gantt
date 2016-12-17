@@ -18,7 +18,7 @@
 //              console.log("chart rendered");
 //          }
 //      });
-
+//
 //
 /*jshint shadow:true, unused:false, laxbreak:true, evil:true*/
 /*globals jQuery, alert*/
@@ -44,6 +44,7 @@
             minScale: "hours",
             waitText: "Please wait...",
             onItemClick: function (data) { return; },
+	    onItemDblDlick: function (data) { return; },
             onAddClick: function (data) { return; },
             onRender: function() { return; },
             onDataLoadFailed: function(data) { return; },
@@ -940,7 +941,7 @@
             // **Progress Bar**
             // Return an element representing a progress of position within
             // the entire chart
-            createProgressBar: function (days, cls, desc, label, dataObj) {
+            createProgressBar: function (days, id, cls, desc, label, dataObj) {
                 var cellWidth = tools.getCellSize();
                 var barMarg = tools.getProgressBarMargin() || 0;
                 var bar = $('<div class="bar"><div class="fn-label">' + label + '</div></div>')
@@ -948,6 +949,11 @@
                         .css({
                             width: ((cellWidth * days) - barMarg) + 2
                         })
+			.attr({
+				'id': id,
+				'data-desc': desc, 
+				'data-label': label,
+			})
                         .data("dataObj", dataObj);
 
                 if (desc) {
@@ -969,7 +975,12 @@
                 }
                 bar.click(function (e) {
                     e.stopPropagation();
-                    settings.onItemClick($(this).data("dataObj"));
+                    //settings.onItemClick($(this).data("dataObj"));
+		    settings.onItemClick(this);
+                });
+		bar.dblclick(function (e) {
+               		e.stopPropagation();
+			settings.onItemDblDlick(this);
                 });
                 return bar;
             },
